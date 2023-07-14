@@ -1,0 +1,7 @@
+.card__signature {
+    max-width: 330px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 25px 19px 24px 21px; 
+}

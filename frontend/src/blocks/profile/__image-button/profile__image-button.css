@@ -1,0 +1,23 @@
+.profile__image-button {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    margin: 0;
+    position: relative;
+}   
+
+.profile__image-button::before {
+    position: absolute;
+    content: "";
+    background-image: url(../../../images/avatar-pencil.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    display: none;
+    justify-content: center;
+    color: white;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+}

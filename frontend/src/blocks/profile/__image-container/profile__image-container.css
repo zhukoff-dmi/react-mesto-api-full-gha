@@ -1,0 +1,9 @@
+.profile__image-container {
+    max-width: 120px;
+    max-height: 120px;
+    border-radius: 50%;
+}
+
+.profile__image-container:hover .profile__image-button::before {
+    display: flex;
+}
