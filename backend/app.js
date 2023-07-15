@@ -11,13 +11,13 @@ const ERROR_NOT_FOUND = 404;
 const { PORT = 3000 } = process.env;
 const app = express();
 
-app.use(cors());
-
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb')
   .then(() => console.log('Подключено к MongoDB'))
   .catch((err) => {
     console.error('Ошибка подключения к MongoDB:', err);
   });
+
+app.use(cors());
 
 app.use(express.json());
 
