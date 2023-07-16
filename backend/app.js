@@ -5,6 +5,7 @@ const cors = require('cors');
 const { errors } = require('celebrate');
 const router = require('./routes/index');
 const centralError = require('./middlewares/centralError');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const ERROR_NOT_FOUND = 404;
 
@@ -23,7 +24,11 @@ app.use(express.json());
 
 app.use(helmet());
 
+app.use(requestLogger);
+
 app.use(router);
+
+app.use(errorLogger);
 
 app.use(errors());
 

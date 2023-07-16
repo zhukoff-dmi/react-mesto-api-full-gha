@@ -10,7 +10,7 @@
 
 ## Ссылки на проект
 
-IP-адрес 51.250.73.233
+IP-адрес <51.250.73.233>
 
 Frontend https://zhukoffdmi.student.nomoredomains.work
 
