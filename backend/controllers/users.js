@@ -78,12 +78,12 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.code === 11000) {
-        return next(new ConflictError('Такой Email уже используется'));
+        next(new ConflictError('Такой Email уже используется'));
+      } else if (err instanceof mongoose.Error.ValidationError) {
+        next(new BadRequestError('Переданны некоректные данные'));
+      } else {
+        next(err);
       }
-      if (err instanceof mongoose.Error.ValidationError) {
-        return next(new BadRequestError('Переданны некоректные данные'));
-      }
-      return next(err);
     });
 };
 
