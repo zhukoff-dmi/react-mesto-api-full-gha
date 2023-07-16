@@ -9,8 +9,5 @@
 
 ## Ссылки на проект
 
-IP-адрес x.x.x.x
+[Адрес репозитория] (https://github.com/zhukoff-dmi/react-mesto-api-full-gha.git)
 
-Frontend https://...
-
-Backend https://...
