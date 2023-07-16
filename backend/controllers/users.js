@@ -7,6 +7,8 @@ const BadRequestError = require('../errors/BadRequestError');
 const AuthorizationError = require('../errors/AuthorizationError');
 const NotFoundError = require('../errors/NotFoundError');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+
 module.exports.getUser = (req, res, next) => {
   User.find({})
     .then((user) => res.send(user))
@@ -100,7 +102,11 @@ module.exports.login = (req, res, next) => {
           if (!isEqual) {
             next(new AuthorizationError('Неправильные почта или пароль'));
           }
-          const token = jwt.sign({ _id: user._id }, 'super-secret-key', { expiresIn: '7d' });
+          const token = jwt.sign(
+            { _id: user._id },
+            NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key',
+            { expiresIn: '7d' },
+          );
           return res.status(200).send({ token });
         });
     })

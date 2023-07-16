@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const AuthorizationError = require('../errors/AuthorizationError');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+
 module.exports.auth = (req, res, next) => {
   const { authorization } = req.headers;
 
@@ -11,7 +13,7 @@ module.exports.auth = (req, res, next) => {
   let payload;
 
   try {
-    payload = jwt.verify(token, 'super-secret-key');
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key');
   } catch (err) {
     next(new AuthorizationError('Авторизация не пройдена'));
   }
