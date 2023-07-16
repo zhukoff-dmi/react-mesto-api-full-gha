@@ -11,3 +11,8 @@
 
 [Адрес репозитория] (https://github.com/zhukoff-dmi/react-mesto-api-full-gha.git)
 
+IP-адрес 51.250.73.233
+
+Frontend https://zhukoffdmi.student.nomoredomains.work
+
+Backend https://api.zhukoffdmi.student.nomoredomains.work
