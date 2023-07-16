@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
-const AuthorizationError = require('../errors/AuthorizationError');
+// const AuthorizationError = require('../errors/AuthorizationError');
+
+const ANAUTHORUZED_ERROR = 401;
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -7,7 +9,10 @@ module.exports.auth = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return next(new AuthorizationError('Аторизируйтесь'));
+    return res
+      .status(ANAUTHORUZED_ERROR)
+      .send({ message: 'Аторизируйтесь' });
+    // return next(new AuthorizationError('Аторизируйтесь'));
   }
   const token = authorization.replace('Bearer ', '');
   let payload;
@@ -15,7 +20,10 @@ module.exports.auth = (req, res, next) => {
   try {
     payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key');
   } catch (err) {
-    throw new AuthorizationError('Аторизируйтесь');
+    return res
+      .status(ANAUTHORUZED_ERROR)
+      .send({ message: 'Пользователь не авторизован' });
+    // throw new AuthorizationError('Аторизируйтесь');
   }
   req.user = payload;
   return next();
