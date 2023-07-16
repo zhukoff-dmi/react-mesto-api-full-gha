@@ -1,11 +1,8 @@
 const mongoose = require('mongoose');
 const Card = require('../models/card');
-
-const ERROR_BAD_REQUEST = 400;
-const ERROR_NOT_FOUND = 404;
-const CREATED = 201;
-const OK = 200;
-const ERROR_FORBIDDEN = 403;
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
+const ForbiddenError = require('../errors/ForbiddenError');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -16,10 +13,10 @@ module.exports.getCards = (req, res, next) => {
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.status(CREATED).send(card))
+    .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        res.status(ERROR_BAD_REQUEST).send({ message: 'Переданны некоректные данные', stack: err.stack });
+        next(new BadRequestError(`Переданны некоректные данные. ${err.message}`));
       } else {
         next(err);
       }
@@ -36,16 +33,16 @@ module.exports.deleteCard = (req, res, next) => {
       if (owner === user) {
         return Card.deleteOne(card)
           .then(() => {
-            res.status(OK).send({ message: 'Карточка удалена' });
+            res.status(200).send({ message: 'Карточка удалена' });
           });
       }
-      return next(res.status(ERROR_FORBIDDEN).send({ message: 'У вас недостаточно прав' }));
+      return next(new ForbiddenError('У вас недостаточно прав'));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некоректные данные' });
+        next(new BadRequestError('Переданны некоректные данные'));
       } else if (err.name === 'DocumentNotFoundError') {
-        res.status(ERROR_NOT_FOUND).send({ message: 'Карточка не найдена' });
+        next(new NotFoundError('Карточка не найдена'));
       } else {
         next(err);
       }
@@ -61,14 +58,13 @@ module.exports.likeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(ERROR_NOT_FOUND).send({ message: 'Карточка не найдена' });
-        return;
+        throw new NotFoundError('Карточка не найдена');
       }
-      res.status(OK).send({ message: 'Карточка понравилась' });
+      res.status(200).send({ message: 'Карточка понравилась' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некоректные данные' });
+        next(new BadRequestError('Переданны некоректные данные'));
       } else {
         next(err);
       }
@@ -84,14 +80,13 @@ module.exports.dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(ERROR_NOT_FOUND).send({ message: 'Карточка не найдена' });
-        return;
+        throw new NotFoundError('Карточка не найдена');
       }
-      res.status(OK).send({ message: 'Карточка не понравилась' });
+      res.status(200).send({ message: 'Карточка не понравилась' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некоректные данные' });
+        next(new BadRequestError('Переданны некоректные данные'));
       } else {
         next(err);
       }

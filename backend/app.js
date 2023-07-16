@@ -6,8 +6,7 @@ const { errors } = require('celebrate');
 const router = require('./routes/index');
 const centralError = require('./middlewares/centralError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-
-const ERROR_NOT_FOUND = 404;
+const NotFoundError = require('./errors/NotFoundError');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -34,8 +33,8 @@ app.use(errors());
 
 app.use(centralError);
 
-app.use('/', (req, res) => {
-  res.status(ERROR_NOT_FOUND).send({ message: 'Страница не найдена' });
+app.use('/', (req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
 });
 
 app.listen(PORT, () => {

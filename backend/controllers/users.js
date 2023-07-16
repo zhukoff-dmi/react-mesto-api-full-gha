@@ -2,13 +2,10 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-
-const OK = 200;
-const ERROR_BAD_REQUEST = 400;
-const ERROR_NOT_FOUND = 404;
-const CREATED = 201;
-const CONFLICT_ERROR = 409;
-const ANAUTHORUZED_ERROR = 401;
+const ConflictError = require('../errors/ConflictError');
+const BadRequestError = require('../errors/BadRequestError');
+const AuthorizationError = require('../errors/AuthorizationError');
+const NotFoundError = require('../errors/NotFoundError');
 
 module.exports.getUser = (req, res, next) => {
   User.find({})
@@ -21,9 +18,9 @@ module.exports.getUserById = (req, res, next) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        next(res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' }));
+        throw new NotFoundError('Пользователь с указанным id не найден');
       }
-      res.status(OK).send({
+      res.status(200).send({
         _id: user._id,
         name: user.name,
         about: user.about,
@@ -33,7 +30,7 @@ module.exports.getUserById = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некоректные данные' }));
+        next(new BadRequestError('Переданны некоректные данные'));
       } else {
         next(err);
       }
@@ -47,10 +44,10 @@ module.exports.updateUserInfo = (req, res, next) => {
     { name, about },
     { new: true, runValidators: true },
   )
-    .then((user) => res.status(OK).send(user))
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        res.status(ERROR_BAD_REQUEST).send({ message: 'Переданны некоректные данные' });
+        next(new BadRequestError('Переданны некоректные данные'));
       } else {
         next(err);
       }
@@ -70,7 +67,7 @@ module.exports.createUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((user) => res.status(CREATED).send({
+    .then((user) => res.status(201).send({
       _id: user._id,
       name: user.name,
       about: user.about,
@@ -79,9 +76,9 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.code === 11000) {
-        res.status(CONFLICT_ERROR).send({ message: 'Такой Email уже используется' });
+        next(new ConflictError('Такой Email уже используется'));
       } else if (err instanceof mongoose.Error.ValidationError) {
-        res.status(ERROR_BAD_REQUEST).send({ message: 'Переданны некоректные данные' });
+        next(new BadRequestError('Переданны некоректные данные'));
       } else {
         next(err);
       }
@@ -96,15 +93,15 @@ module.exports.login = (req, res, next) => {
     .select('+password')
     .then((user) => {
       if (!user) {
-        next(res.status(ANAUTHORUZED_ERROR).send({ message: 'Неправильные почта или пароль' }));
+        next(new AuthorizationError('Неправильные почта или пароль'));
       }
       return bcrypt.compare(password, user.password)
         .then((isEqual) => {
           if (!isEqual) {
-            next(res.status(ANAUTHORUZED_ERROR).send({ message: 'Неправильные почта или пароль' }));
+            next(new AuthorizationError('Неправильные почта или пароль'));
           }
           const token = jwt.sign({ _id: user._id }, 'super-secret-key', { expiresIn: '7d' });
-          return res.status(OK).send({ token });
+          return res.status(200).send({ token });
         });
     })
     .catch(next);
@@ -114,7 +111,7 @@ module.exports.getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
     .orFail()
-    .then((user) => res.status(OK).send(user))
+    .then((user) => res.status(200).send(user))
     .catch(next);
 };
 
@@ -123,12 +120,12 @@ module.exports.updateAvatar = (req, res, next) => {
   User.findByIdAndUpdate(
     req.user._id,
     { avatar },
-    { new: true },
+    { new: true, runValidators: true },
   )
-    .then((user) => res.status(OK).send(user))
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        res.status(ERROR_BAD_REQUEST).send({ message: 'Переданны некоректные данные' });
+        next(new BadRequestError('Переданны некоректные данные'));
       } else {
         next(err);
       }
