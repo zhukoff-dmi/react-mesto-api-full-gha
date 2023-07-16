@@ -15,7 +15,7 @@ module.exports.auth = (req, res, next) => {
   try {
     payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key');
   } catch (err) {
-    next(new AuthorizationError('Авторизация не пройдена'));
+    throw new AuthorizationError('Авторизация не пройдена');
   }
   req.user = payload;
   return next();
