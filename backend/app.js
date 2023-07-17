@@ -9,7 +9,6 @@ const { errors } = require('celebrate');
 const router = require('./routes/index');
 const centralError = require('./middlewares/centralError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const NotFoundError = require('./errors/NotFoundError');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -35,8 +34,6 @@ app.use(errorLogger);
 app.use(errors());
 
 app.use(centralError);
-
-app.use('/', (req, res, next) => next(new NotFoundError('Страница не найдена')));
 
 app.listen(PORT, () => {
   console.log('Server started on port 3000');

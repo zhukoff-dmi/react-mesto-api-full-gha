@@ -95,12 +95,12 @@ module.exports.login = (req, res, next) => {
     .select('+password')
     .then((user) => {
       if (!user) {
-        next(new AuthorizationError('Неправильные почта или пароль'));
+        throw new AuthorizationError('Неправильные почта или пароль');
       }
       return bcrypt.compare(password, user.password)
         .then((isEqual) => {
           if (!isEqual) {
-            next(new AuthorizationError('Неправильные почта или пароль'));
+            throw new AuthorizationError('Неправильные почта или пароль');
           }
           const token = jwt.sign(
             { _id: user._id },
