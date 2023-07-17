@@ -36,9 +36,7 @@ app.use(errors());
 
 app.use(centralError);
 
-app.use('/', (req, res, next) => {
-  next(new NotFoundError('Страница не найдена'));
-});
+app.use('/', (req, res, next) => next(new NotFoundError('Страница не найдена')));
 
 app.listen(PORT, () => {
   console.log('Server started on port 3000');
